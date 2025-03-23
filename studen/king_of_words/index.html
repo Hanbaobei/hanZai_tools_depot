@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>单词王默写小游戏</title>
+  </head>
+
+  <body>
+    <h1>单词王默写小游戏</h1>
+    <div class="main-container">
+      <div class="game-container">
+        <div id="gameRules" style="margin: auto; text-align: left">
+          游戏规则：根据给出的单词提示，将字母拖到对应的方框中完成单词拼写。若拼写正确，将获得奖励；若错误，可再次尝试。你还可以选择撤回上一步操作或跳过当前单词。
+        </div>
+        <div id="letters"></div>
+        <div id="boxes"></div>
+        <div id="result"></div>
+        <div id="reward" style="display: none">
+          恭喜你，回答正确！奖励你一颗小星星！
+        </div>
+        <div id="error" style="display: none">回答错误，请重新开始吧！</div>
+        <div class="button-container">
+          <button onclick="startGame()" id="startButton">开始游戏</button>
+          <button
+            onclick="undoLastMove()"
+            id="undoButton"
+            style="display: none"
+          >
+            撤回
+          </button>
+          <button onclick="skipWord()" id="skipButton" style="display: none">
+            跳过
+          </button>
+        </div>
+        <div id="gameInfo" class="gameInfo" style="display: none">
+          <!-- 添加当前游戏时间 -->
+          <span id="currentTime"></span>
+          <!-- 添加当前游戏的答对数量 -->
+          <span id="correctCount"></span>
+        </div>
+      </div>
+      <div class="leaderboard-container">
+        <!-- 新增单词提示区域 -->
+        <div id="wordHint"></div>
+        <h2>挑战排行榜</h2>
+        <table id="leaderboard">
+          <thead>
+            <tr>
+              <th>挑战时间</th>
+              <th>正确数量</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 排行榜数据将动态添加到这里 -->
+          </tbody>
+        </table>
+        <button>清空记录</button>
+      </div>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>

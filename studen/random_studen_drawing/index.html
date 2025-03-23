@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>课堂随机点名</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1 class="title">今天会抽到哪位小可爱呢 ✨</h1>
+
+    <div class="name-container">
+      <!-- 姓名列表由JavaScript动态生成 -->
+    </div>
+
+    <div class="controls">
+      <button onclick="toggleRoll()">开始点名</button>
+      <!-- 抽签数量选择框 -->
+      <div class="speed-control">
+        <select
+          class="count-select"
+          id="count"
+          onchange="setRandomCount(this.value)"
+        ></select>
+      </div>
+    </div>
+
+    <!-- 新增模态窗口 -->
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal-content">
+        <h2 class="modal-title">🎉 抽选结果 🎉</h2>
+        <div class="result-name" id="resultName"></div>
+        <button onclick="closeModal(event)" style="margin-top: 20px">
+          确定
+        </button>
+      </div>
+    </div>
+
+    <script src="index.js"></script>
+  </body>
+</html>

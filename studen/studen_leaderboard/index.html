@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>劳动换新颜</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 在标题下方添加排序按钮 -->
+    <h1>🌸 劳动换新颜 🌸</h1>
+    <button class="sort-btn" onclick="toggleSort()">↓ 按积分排序 ↓</button>
+    <div class="student-list" id="studentList"></div>
+
+    <div class="dialog" id="dialog">
+        <div class="dialog-content">
+            <h3>操作备注</h3>
+            <input type="number" id="points" min="1" max="100" placeholder="请输入分值">
+            <textarea id="remark" rows="3" placeholder="请输入备注..."></textarea>
+            <div class="dialog-buttons">
+                <button onclick="confirmAction()">确定</button>
+                <button onclick="cancelAction()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 在原有dialog下方添加历史记录弹窗 -->
+    <div class="history-dialog" id="historyDialog">
+        <div class="history-content">
+            <h3>📜 积分记录 - <span id="historyTitle"></span></h3>
+            <div class="history-items" id="historyItems"></div>
+            <button class="close-btn" onclick="closeHistoryDialog()">关闭</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

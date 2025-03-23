@@ -1,0 +1,154 @@
+body {
+  background: linear-gradient(120deg, #e0f7fa 0%, #b2ebf2 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+.title {
+  text-align: center;
+  color: #00796b;
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.name-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  gap: 15px;
+  margin: 120px auto;
+}
+
+.name-item {
+  flex: 0 0 calc(12.5% - 15px);
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #80deea;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #00796b;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.name-item::before {
+  content: "★";
+  color: #ffab91;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.controls {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+button {
+  padding: 12px 30px;
+  background: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 150px;
+  height: 60px;
+}
+
+button:hover {
+  background: rgba(0, 150, 136, 0.3);
+  transform: scale(1.05);
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+/* 新增人数选择器样式 */
+.count-select {
+  padding: 8px 15px;
+  border: 2px solid #00796b;
+  border-radius: 8px;
+  background: white;
+  font-size: 16px;
+  color: #004d40;
+}
+
+.active {
+  background: #b2dfdb !important;
+  border-color: #00796b !important;
+  transform: scale(1.05);
+}
+
+/* 新增模态窗口样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0, 150, 136, 0.3);
+  text-align: center;
+  transform: scale(0);
+  transition: all 0.3s ease-out;
+  max-width: 80%;
+}
+
+.modal-content.show {
+  transform: scale(1);
+}
+
+.modal-title {
+  color: #00796b;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.result-name {
+  font-size: 3em;
+  color: #004d40;
+  font-weight: bold;
+  margin: 20px 0;
+  animation: popIn 0.5s;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
