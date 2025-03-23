@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小工具导航</title>
+    <!-- 新增样式 -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .app-title {
+            text-align: center;
+            color: #2d3436;
+            font-size: 2.5em;
+            margin: 30px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 800px;
+            margin: 20px auto;  /* 调整间距 */
+            padding: 20px;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .tool-card a {
+            text-decoration: none;
+            color: #1a73e8;
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tool-card i {
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .tool-card {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+    <!-- 添加图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <h1 class="app-title">寒崽工具集合</h1>  <!-- 新增标题 -->
+    <div class="nav-container">
+        <!-- 动态生成导航项 -->
+        <script>
+            // 工具列表数据
+            const tools = [
+                {
+                    path: "./studen/king_of_words/index.html",
+                    name: "单词王",
+                    icon: "fa-book"
+                },
+                {
+                    path: "./studen/random_studen_drawing/index.html",
+                    name: "抽签",
+                    icon: "fa-random"
+                },
+                {
+                    path: "./studen/studen_leaderboard/index.html",
+                    name: "积分排行",
+                    icon: "fa-chart-line"
+                }
+            ];
+
+            // 动态生成导航项
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.querySelector('.nav-container');
+                
+                tools.forEach(tool => {
+                    const card = document.createElement('div');
+                    card.className = 'tool-card';
+                    card.innerHTML = `
+                        <a href="${tool.path}">
+                            <i class="fas ${tool.icon}"></i>
+                            ${tool.name}
+                        </a>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
