@@ -1,4 +1,4 @@
-min_tools
-.doc
-.docx
-.csv
+min_tools/
+*.doc
+*.docx
+*.csv
