@@ -101,19 +101,46 @@ function toggleSort() {
 }
 
 // 确保每次操作都更新存储
+// 修复1：更新confirmAction中的备注存储结构
 function confirmAction() {
     const points = parseInt(document.getElementById('points').value) || 1;
     const remark = document.getElementById('remark').value;
     
     if (remark) {
-        currentStudent.remarks.push(remark);
+        currentStudent.remarks.push({
+            points: isAdding ? points : -points,  // 存储具体分值
+            remark: remark,
+            timestamp: new Date().toLocaleString() // 添加时间戳
+        });
         currentStudent.points += isAdding ? points : -points;
-        updateLocalStorage(); // 确保每次操作后保存
+        updateLocalStorage();
+        renderStudents(); // 强制刷新列表
     }
-    
     cancelAction();
 }
 
+// 修复2：修正showHistoryDialog中的历史记录渲染
+function showHistoryDialog(name) {
+    const student = students.find(s => s.name === name);
+    const dialog = document.getElementById('historyDialog');
+    document.getElementById('historyTitle').textContent = name;
+    
+    const historyItems = student.remarks.map(r => `
+        <div class="history-item">
+            <span>${r.timestamp}</span>
+            <span class="${r.points > 0 ? 'add' : 'remove'}">
+                ${r.points > 0 ? '+' : ''}${r.points}
+            </span>
+            <span>${r.remark}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('historyItems').innerHTML = historyItems;
+    dialog.style.display = 'block';
+}
+
+// 修复3：移除重复的confirmAction函数定义
+// 删除文件末尾重复的confirmAction函数定义
 function cancelAction() {
     document.getElementById('dialog').style.display = 'none';
     document.getElementById('points').value = '';

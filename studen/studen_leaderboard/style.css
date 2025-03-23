@@ -168,18 +168,65 @@ button {
 }
 
 .history-items {
-  padding: 15px;
+  /* 添加弹性布局容器 */
+  display: flex;
+  flex-direction: column;
 }
 
-.history-item {
+.history-header {
+  margin: 50px auto;
+  border-radius: 25px;
+  box-shadow: 0 0 30px rgba(255, 105, 180, 0.2);
   display: grid;
-  grid-template-columns: 100px 80px 1fr;
+  grid-template-columns: 140px 80px 1fr;
   gap: 15px;
-  padding: 12px;
-  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: bold;
   background: #fff9fb;
-  border-radius: 15px;
   border: 2px solid #ffd9e5;
+}
+
+/* 修复历史记录项被覆盖的问题 */
+#historyItems .history-item {
+  display: grid;
+  grid-template-columns: 140px 80px 1fr;
+  gap: 15px;
+  padding: 15px;
+  margin: 12px 0;
+  background: #fff9fb;
+  border-radius: 12px;
+  border: 2px solid #ffd9e5;
+  font-size: 14px;
+  line-height: 1.6; /* 增加行高 */
+}
+
+.time {
+  color: #666;
+  white-space: nowrap; /* 防止时间换行 */
+}
+
+.remark {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal; /* 允许多行显示 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 最多显示2行 */
+  -webkit-box-orient: vertical;
+}
+
+/* 调整弹窗宽度 */
+.history-content {
+  width: 70%;
+  max-width: 800px;
+}
+
+/* 添加历史项之间的分隔线 */
+.history-item + .history-item {
+  border-top: 1px solid #ffe6f0;
+  margin-top: 10px;
+  padding-top: 10px;
 }
 
 .close-btn {
@@ -199,18 +246,18 @@ button {
 
 /* 新增排序按钮样式 */
 .sort-btn {
-    display: block;
-    margin: 15px auto;
-    padding: 10px 25px;
-    background: linear-gradient(45deg, #ff9eb5, #ff69b4);
-    color: white;
-    border-radius: 25px;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.3s;
+  display: block;
+  margin: 15px auto;
+  padding: 10px 25px;
+  background: linear-gradient(45deg, #ff9eb5, #ff69b4);
+  color: white;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
 .sort-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
 }
