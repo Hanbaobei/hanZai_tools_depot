@@ -94,6 +94,8 @@
     </style>
     <!-- 添加图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 新增manifest链接 -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <h1 class="app-title">寒崽工具集合</h1>  <!-- 新增标题 -->
@@ -137,5 +139,18 @@
             });
         </script>
     </div>
+    <!-- 在body底部添加Service Worker注册 -->
+    <script>
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        }
+    </script>
 </body>
 </html>
