@@ -3,3 +3,4 @@ min_tools/
 *.docx
 *.csv
 *.toml
+.idea/
