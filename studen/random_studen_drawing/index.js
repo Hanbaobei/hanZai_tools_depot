@@ -98,8 +98,20 @@ function highlightRandom() {
 }
 
 // 开始/暂停点名
+// 修改侧边栏导入按钮的点击处理
+// 修改导入按钮事件绑定方式（移除HTML中的onclick，改为JS统一绑定）
+document.querySelector('.import-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('fileInput').click();
+});
+
+// 修复文件选择器事件监听
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+// 修改toggleRoll函数指定具体按钮
 function toggleRoll() {
-  const btn = document.querySelector("button");
+  const btn = document.getElementById('startBtn'); // 使用唯一ID选择器
   if (!isRolling) {
     isRolling = true;
     btn.textContent = "暂停抽选";
@@ -131,3 +143,83 @@ function closeModal(e) {
 
 // 页面加载完成时初始化
 window.onload = initNames;
+
+
+// 新增标题更新函数
+function updateTitle(newTitle) {
+  document.querySelector('.title').textContent = newTitle;
+}
+
+// 在文件上传处理成功后修改标题逻辑
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 添加文件类型验证
+  if (!file.name.endsWith('.txt')) {
+    alert('请选择.txt格式的文本文件');
+    return;
+  }
+
+  const reader = new FileReader();
+  
+  // 添加错误处理
+  reader.onerror = function() {
+    alert('文件读取失败，请检查文件编码是否为UTF-8');
+  };
+
+  reader.onload = function(e) {
+    try {
+      const names = e.target.result.split(',').map(name => name.trim());
+      const validNames = names.filter(name => name.length > 0);
+      
+      // 添加空名单校验
+      if (validNames.length === 0) {
+        alert('文件中未找到有效姓名，请检查格式');
+        return;
+      }
+
+      students.length = 0;
+      students.push(...validNames);
+      
+      const container = document.querySelector(".name-container");
+      container.innerHTML = '';
+      generateNameElements();
+      initCountSelector();
+      // 修改标题更新逻辑，使用输入框的值
+      updateTitle(document.getElementById('titleInput').value);
+      
+      // 重置文件输入
+      event.target.value = '';
+      
+    } catch (error) {
+      alert('文件解析错误: ' + error.message);
+    }
+  };
+  
+  reader.readAsText(file, 'UTF-8');
+}
+
+// 新增生成姓名元素函数
+function generateNameElements() {
+  const container = document.querySelector(".name-container");
+  students.forEach((name) => {
+    const div = document.createElement("div");
+    div.className = "name-item";
+    div.textContent = name;
+    container.appendChild(div);
+  });
+}
+
+// 修改初始化函数
+function initNames() {
+  initCountSelector();
+  generateNameElements();  // 使用新的生成函数
+}
+
+function toggleSettings() {
+  const sidebar = document.getElementById('settingsSidebar');
+  const mask = document.getElementById('sidebarMask');
+  sidebar.classList.toggle('active');
+  mask.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+}

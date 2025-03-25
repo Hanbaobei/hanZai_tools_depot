@@ -6,14 +6,52 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <!-- 替换原有侧边栏结构 -->
+    <div class="modal-sidebar" id="settingsSidebar">
+      <div class="sidebar-content">
+        <div class="sidebar-header">
+          <h3>⚙️ 系统设置</h3>
+          <button class="close-btn" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="setting-item">
+          <label>抽签标题</label>
+          <input
+            type="text"
+            id="titleInput"
+            value="今天会抽到哪位小可爱呢 ✨"
+            oninput="updateTitle(this.value)"
+          />
+        </div>
+
+        <div class="setting-item">
+          <button class="import-btn">
+            📁 导入学生名单
+          </button>
+          <input 
+            type="file" 
+            id="fileInput" 
+            accept=".txt" 
+            hidden
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div class="sidebar-mask" id="sidebarMask" onclick="toggleSettings()"></div>
+
+    <!-- 修改原标题 -->
     <h1 class="title">今天会抽到哪位小可爱呢 ✨</h1>
 
     <div class="name-container">
       <!-- 姓名列表由JavaScript动态生成 -->
     </div>
 
+    <!-- 在controls下方添加设置按钮 -->
     <div class="controls">
-      <button onclick="toggleRoll()">开始点名</button>
+      <!-- 修改开始点名按钮，添加唯一ID -->
+      <button id="startBtn" onclick="toggleRoll()">开始点名</button>
+
       <!-- 抽签数量选择框 -->
       <div class="speed-control">
         <select
@@ -21,6 +59,45 @@
           id="count"
           onchange="setRandomCount(this.value)"
         ></select>
+      </div>
+    </div>
+
+    <!-- 新增设置按钮 -->
+    <!-- 修改设置按钮 -->
+    <button class="float-setting-btn" onclick="toggleSettings()">⚙️</button>
+    
+    <!-- 调整模态窗口关闭按钮位置 -->
+    <div class="modal-sidebar" id="settingsSidebar">
+      <div class="sidebar-content">
+        <div class="sidebar-header">
+          <h3>⚙️ 系统设置</h3>
+          <button class="close-btn" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="setting-item">
+          <label>抽签标题</label>
+          <input
+            type="text"
+            id="titleInput"
+            value="今天会抽到哪位小可爱呢 ✨"
+            oninput="updateTitle(this.value)"
+          />
+        </div>
+
+        <div class="setting-item">
+          <button
+            class="import-btn"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            📁 导入学生名单
+          </button>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".txt"
+            onchange="handleFileSelect(event)"
+            hidden
+          />
+        </div>
       </div>
     </div>
 
