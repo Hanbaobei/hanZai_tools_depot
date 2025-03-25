@@ -2,3 +2,4 @@ min_tools/
 *.doc
 *.docx
 *.csv
+*.toml
