@@ -25,8 +25,33 @@
 
         .nav-container {
             max-width: 800px;
-            margin: 20px auto;  /* 调整间距 */
+            margin: 20px auto;
             padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .app-title {
+                font-size: 2em;
+                margin: 20px 0;
+            }
+            
+            .nav-container {
+                margin: 10px 0;
+                padding: 10px;
+            }
+
+            .tool-card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .tool-card a {
+                font-size: 16px;
+            }
+
+            .tool-card i {
+                font-size: 20px;
+            }
         }
 
         .tool-card {

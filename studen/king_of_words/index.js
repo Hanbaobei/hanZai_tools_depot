@@ -48,6 +48,9 @@ function startGame() {
     document.getElementById(
         "correctCount"
     ).textContent = `答对数量: ${correctCount}`;
+    
+    // 显示游戏控制按钮
+    document.getElementById('skipButton').style.display = 'inline-block';
 }
 
 // 随机选择单词
@@ -260,6 +263,11 @@ function loadLoaderboard() {
     });
 }
 
+function clearLeaderboard() {
+    localStorage.removeItem("leaderboard");
+    loadLoaderboard(); 
+}
+
 function getRandomUUID() {
     var s = [];
     var hexDigits = "0123456789abcdef";
@@ -273,6 +281,7 @@ function getRandomUUID() {
     var uuid = s.join("");
     return uuid;
 }
+
 
 // 页面加载时从 localStorage 中读取数据并更新排行榜
 window.onload = function () {
@@ -289,3 +298,67 @@ window.onload = function () {
         countCell.textContent = entry.correctCount;
     });
 };
+
+function exitGame() {
+    // 停止游戏计时
+    clearInterval(timer);
+    // 重置游戏状态
+    currentWord = null;
+    // 隐藏游戏元素
+    document.getElementById('undoButton').style.display = 'none';
+    document.getElementById('skipButton').style.display = 'none';
+    document.getElementById('exitButton').style.display = 'none';
+    // 显示开始按钮
+    document.getElementById('startButton').style.display = 'inline-block';
+    // 清空字母和输入框
+    document.getElementById('letters').innerHTML = '';
+    document.getElementById('boxes').innerHTML = '';
+}
+
+// 在字母创建逻辑中添加触摸事件监听
+function createLetterElement(letter) {
+    const letterElement = document.createElement('div');
+    letterElement.className = 'letter';
+    letterElement.textContent = letter;
+    
+    // 添加触摸事件
+    letterElement.addEventListener('touchstart', handleTouchStart);
+    letterElement.addEventListener('touchmove', handleTouchMove);
+    letterElement.addEventListener('touchend', handleTouchEnd);
+    
+    // 保持原有鼠标事件
+    letterElement.draggable = true;
+    letterElement.addEventListener('dragstart', handleDragStart);
+    letterElement.addEventListener('dragend', handleDragEnd);
+    
+    return letterElement;
+}
+
+// 新增触摸事件处理函数
+let touchOffsetX, touchOffsetY, draggedElement = null;
+
+function handleTouchStart(e) {
+    draggedElement = e.target;
+    const rect = draggedElement.getBoundingClientRect();
+    touchOffsetX = e.touches[0].clientX - rect.left;
+    touchOffsetY = e.touches[0].clientY - rect.top;
+    e.preventDefault();
+}
+
+function handleTouchMove(e) {
+    if (!draggedElement) return;
+    const x = e.touches[0].clientX - touchOffsetX;
+    const y = e.touches[0].clientY - touchOffsetY;
+    draggedElement.style.position = 'fixed';
+    draggedElement.style.left = x + 'px';
+    draggedElement.style.top = y + 'px';
+    e.preventDefault();
+}
+
+function handleTouchEnd(e) {
+    if (!draggedElement) return;
+    handleDrop(draggedElement);
+    draggedElement.style.position = 'static';
+    draggedElement = null;
+    e.preventDefault();
+}

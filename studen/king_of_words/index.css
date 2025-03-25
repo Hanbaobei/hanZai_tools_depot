@@ -10,12 +10,49 @@ body {
   display: flex;
   justify-content: center;
   align-items: stretch;
+  flex-direction: column; /* 改为垂直排列 */
+  padding: 10px;
   gap: 20px;
 }
 
 .game-container {
+  order: 1; /* 游戏区在上 */
+  width: 100%;
+  margin: 0 auto;
+  max-width: 600px; /* 保留最大宽度限制 */
+}
+
+.leaderboard-container {
+  order: 2;
+  width: 100%;  /* 已设置为100%宽度 */
+  max-width: 600px; /* 保留最大宽度限制 */
+  margin: 0 auto;
+}
+
+/* 添加手机端适配 */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .button-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  button {
+    width: 100%;
+    padding: 8px;
+  }
+
+  #gameRules {
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+
+.game-container {
   font-family: "Comic Sans MS", cursive, sans-serif;
-  width: 400px;
   height: auto;
   padding: 20px;
   background-color: white;
@@ -27,7 +64,7 @@ body {
 
 .leaderboard-container {
   font-family: "Comic Sans MS", cursive, sans-serif;
-  width: 250px;
+  width: 100%; /* 修改此处：将250px改为100% */
   padding: 20px;
   background-color: white;
   border: 1px solid #ccc;
