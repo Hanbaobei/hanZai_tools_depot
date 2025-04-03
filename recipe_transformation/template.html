@@ -1,23 +1,48 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>尚城幼儿园幼儿食谱</title>
-</head>
-<body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        font-size: 30px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+
+  <body>
     <h1>尚城幼儿园幼儿食谱</h1>
     <table border="1">
-        <tr>
-            {% for header in headers %}
-            <th>{{ header }}</th>
-            {% endfor %}
-        </tr>
-        {% for row in rows %}
-        <tr>
-            {% for cell in row %}
-            <td>{{ cell }}</td>
-            {% endfor %}
-        </tr>
+      <tr>
+        {% for header in headers %}
+        <th>{{ header }}</th>
         {% endfor %}
+      </tr>
+      {% for row in rows %}
+      <tr>
+        {% for cell in row %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
     </table>
-</body>
+  </body>
 </html>

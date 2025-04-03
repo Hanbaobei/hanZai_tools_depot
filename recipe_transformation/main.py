@@ -1,9 +1,30 @@
-import pandas as pd
-from jinja2 import Template
-from docx import Document
-from docx.enum.section import WD_ORIENTATION
-from docx.shared import Inches
+import io
 import os
+import logging
+from flask import Flask, request, render_template, redirect
+from werkzeug.utils import secure_filename
+from flask import send_file, g
+from flask_cors import CORS
+
+from recipe_transformation.dataBase import TranslateDataBase, LexiconDataBase
+from recipe_transformation.translate import (
+    extract_menu_data,
+    load_translation_from_csv,
+    translate_data,
+    generate_html,
+    generate_docx,
+)
+
+app = Flask(__name__, static_folder="static", static_url_path="/")
+CORS(app)  # 添加CORS支持
+app.config["UPLOAD_FOLDER"] = "uploads"
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # 获取当前文件的路径
 current_file_path = os.path.abspath(__file__)
@@ -11,130 +32,160 @@ current_file_path = os.path.abspath(__file__)
 current_folder_path = os.path.dirname(current_file_path)
 
 
-# 获取中文食谱数据
-def extract_menu_data(doc_path):
-    """
-    从 Word 文档中提取食谱数据。
-    :param doc_path: Word 文档的路径
-    :return: 包含食谱数据的字典
-    """
-    # 打开文档
-    doc = Document(doc_path)
-
-    # 初始化数据结构
-    data = {
-        "餐别 星期": ["早餐", "早点", "中餐", "体弱儿餐", "午点"],
-        "星期一": [],
-        "星期二": [],
-        "星期三": [],
-        "星期四": [],
-        "星期五": [],
-    }
-
-    # 遍历文档中的表格
-    for table in doc.tables:
-        for i, row in enumerate(table.rows):
-            # 跳过表头行
-            if i == 0:
-                continue
-            # 获取每一行的数据
-            cells = [cell.text.strip() for cell in row.cells]
-            # 将数据添加到对应的星期中
-            data["星期一"].append(cells[1])
-            data["星期二"].append(cells[2])
-            data["星期三"].append(cells[3])
-            data["星期四"].append(cells[4])
-            data["星期五"].append(cells[5])
-
-    return data
+# 数据库
+def get_translateDataBase():
+    """Get a thread-local database connection"""
+    if "translateDataBase" not in g:
+        g.translateDataBase = TranslateDataBase()
+    return g.translateDataBase
 
 
-# 获取中英文对照表
-def load_translation_from_csv(csv_path):
-    """
-    从 CSV 文件中加载中英文对照翻译数据。
-    :param csv_path: CSV 文件的路径
-    :return: 包含中英文对照的字典
-    """
-    try:
-        df = pd.read_csv(csv_path, encoding="utf-8")
-    except UnicodeDecodeError:
-        df = pd.read_csv(csv_path, encoding="gbk")
-    translation = dict(zip(df["中文名称"], df["英文名称"]))
-    return translation
+def get_lexiconDataBase():
+    """Get a thread-local database connection"""
+    if "lexiconDataBase" not in g:
+        g.lexiconDataBase = LexiconDataBase()
+    return g.lexiconDataBase
+
+@app.route("/")
+def index():
+    return redirect('/index.html')
 
 
-# 将中文食谱转换为中英文对照
-def translate_text(text, translation):
-    items = text.split()
-    translated_items = [f"{item} \n {translation.get(item, '')} \n " for item in items]
-    return " ".join(translated_items)
+@app.route("/upload", methods=["GET", "POST"])
+def upload_file():
+    global html
+    if request.method == "POST":
+        # 检查是否有文件上传
+        if "file" not in request.files:
+            return "没有选择文件"
 
-def translate_data(data, translation):
-    """
-    将食谱数据中的中文转换为中英文对照。
-    :param data: 包含食谱数据的字典
-    :param translation: 包含中英文对照的字典
-    :return: 转换后的食谱数据字典
-    """
-    translated_data = {
-        key: [translate_text(item, translation) for item in value] for key, value in data.items()
-    }
-    return translated_data
+        file = request.files["file"]
+        if file.filename == "":
+            return "没有选择文件"
 
-def translate_document(doc_path, output_path):
-    """
-    将 Word 文档中的中文转换为中英文对照，并保存为新的 Word 文档。
-    :param doc_path: 输入 Word 文档的路径
-    :param output_path: 输出 Word 文档的路径
-    """
-    # 使用示例
-    data = extract_menu_data(current_folder_path + os.sep + doc_path)
-    translation = load_translation_from_csv(
-        current_folder_path + os.sep + "translation.csv"
+        if file:
+            if file.filename and file.filename.endswith(".docx"):
+                # 保存文件
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file.save(file_path)
+                try:
+                    # 解析和翻译文件
+                    data = extract_menu_data(file_path)
+                    translation = load_translation_from_csv(
+                        os.path.join(current_folder_path, "translation.csv")
+                    )
+                    translated_data = translate_data(data, translation)
+                    html = generate_html(translated_data)
+                    translateDataBase = get_translateDataBase()
+                    id = translateDataBase.insert_translate(html, file.filename)
+
+                    return {"id": id, "html": html, "filename": filename}
+                finally:
+                    # 删除上传的文件
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+            else:
+                return "请上传 .docx 文件"
+
+
+@app.route("/download", methods=["GET"])
+def download_file():
+    # 获取请求中的UUID参数
+    uuid = request.args.get("uuid")
+    if not uuid:
+        return "缺少UUID参数", 400
+
+    # 从数据库获取对应的HTML内容
+    translateDataBase = get_translateDataBase()
+    [id, html, file_name, upload_time] = translateDataBase.get_translate_by_id(uuid)
+    if not html:
+        return "未找到对应的食谱", 404
+
+    # 生成Word文档
+    output_filename = "尚城幼儿园幼儿食谱.docx"
+    doc = generate_docx(html)
+
+    # 将文档保存到内存中
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=output_filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
-    # 转换食谱数据
-    translated_data = translate_data(data, translation)
-
-    # 创建DataFrame
-    df = pd.DataFrame(translated_data)
-
-    # 从文件中加载HTML模板
-    with open(
-        current_folder_path + os.sep + "template.html", "r", encoding="utf-8"
-    ) as f:
-        template_content = f.read()
-    html_template = Template(template_content)
-    html = html_template.render(headers=df.columns, rows=df.values.tolist())
-
-    # 将HTML转换为Word文档
-    doc = Document()
-
-    section = doc.sections[0]
-    section.orientation = WD_ORIENTATION.LANDSCAPE  # 设置为横向
-    section.left_margin = Inches(0.3937)  # 1厘米转换为英寸
-    section.right_margin = Inches(0.3937)
-    section.top_margin = Inches(0.3937)
-    section.bottom_margin = Inches(0.3937)
-
-    doc.add_paragraph("尚城幼儿园幼儿食谱")
-    doc.add_paragraph("周次:7")
-    doc.add_paragraph("日期:2025年3月24日-28日")
-    doc.add_paragraph("")
-
-    # 添加表格
-    table = doc.add_table(rows=1, cols=len(df.columns))
-    hdr_cells = table.rows[0].cells
-    for i, header in enumerate(df.columns):
-        hdr_cells[i].text = header
-
-    for row in df.values.tolist():
-        row_cells = table.add_row().cells
-        for i, cell in enumerate(row):
-            row_cells[i].text = cell
-
-    # 保存Word文档
-    doc.save(current_folder_path + os.sep + "data" + os.sep + output_path)
 
 
-translate_document("尚城幼儿园幼儿食谱第7周.docx", "尚城幼儿园幼儿食谱第7周.docx")
+@app.route("/list", methods=["GET"])
+def list_translate():
+    translateDataBase = get_translateDataBase()
+    translates = translateDataBase.get_all_translate()
+    return {"data": translates}
+
+
+@app.route("/get/<id>", methods=["GET"])
+def get_translate_id(id):
+    """根据ID获取单个翻译记录"""
+    translateDataBase = get_translateDataBase()
+    result = translateDataBase.get_translate_by_id(id)
+    if result:
+        return {
+            "id": result[0],
+            "html": result[1],
+            "file_name": result[2],
+            "upload_time": result[3],
+        }
+    return {"error": "未找到对应的记录"}, 404
+
+
+@app.route("/lexicon/list", methods=["GET"])
+def list_lexicon():
+    lexiconDataBase = get_lexiconDataBase()
+    lexicons = lexiconDataBase.get_lexicon_all()
+    return {"data": lexicons}
+
+
+@app.route("/lexicon/add", methods=["POST"])
+def add_lexicon():
+    lexiconDataBase = get_lexiconDataBase()
+    data = request.json
+    id = lexiconDataBase.insert_lexicon(data["item"], data["value"])
+    return {"id": id}
+
+
+@app.route("/lexicon/delete/<id>", methods=["DELETE"])
+def delete_lexicon(id):
+    lexiconDataBase = get_lexiconDataBase()
+    lexiconDataBase.delete_lexicon(id)
+    return {"message": "删除成功"}
+
+
+@app.route("/lexicon/update/<id>", methods=["PUT"])
+def update_lexicon(id):
+    lexiconDataBase = get_lexiconDataBase()
+    data = request.json
+    lexiconDataBase.update_lexicon(id, data["item"], data["value"])
+    return {"message": "更新成功"}
+
+
+@app.route("/lexicon/search", methods=["GET"])
+def search_lexicon():
+    lexiconDataBase = get_lexiconDataBase()
+    keyword = request.args.get("keyword")
+    if not keyword:
+        return {"error": "缺少关键字参数"}, 400
+    results = lexiconDataBase.search_lexicon(keyword)
+    return {"data": results}
+
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)

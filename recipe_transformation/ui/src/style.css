@@ -1,0 +1,32 @@
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+/* 取消表单元素的默认样式 */
+input, textarea, select, button {
+    appearance: none;
+    background: none;
+    border-radius: 0;
+}
+
+/* 取消链接的默认样式 */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 取消图片的默认样式 */
+img {
+    border: 0;
+    max-width: 100%;
+    height: auto;
+}
