@@ -23,7 +23,7 @@ const isCollapse = ref(false)
           </el-icon>
           <template #title>解析食谱</template>
         </el-menu-item>
-        <el-menu-item index="/lexicon">
+        <el-menu-item index="/word">
           <el-icon>
             <setting/>
           </el-icon>

@@ -1,15 +1,17 @@
 import {createRouter, createWebHashHistory} from "vue-router";
 
-const routes = [{
-    path: "/",
-    name: "home",
-    component: () => import("@/views/Home.vue")
-},
+const routes = [
     {
-        path: "/lexicon",
-        name: "lexicon",
-        component: () => import("@/views/Lexicon.vue")
-    }]
+        path: "/",
+        name: "task",
+        component: () => import("@/views/task/index.vue")
+    },
+    {
+        path: "/word",
+        name: "word",
+        component: () => import("@/views/word/index.vue")
+    }
+]
 
 
 const router = createRouter({

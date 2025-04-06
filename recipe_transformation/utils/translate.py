@@ -1,35 +1,18 @@
+import sys
 import pandas as pd
 from jinja2 import Template
 from docx.enum.section import WD_ORIENTATION
 from docx.shared import Inches
 from docx import Document
 import os
-import logging
 from htmldocx import HtmlToDocx
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
-from recipe_transformation.dataBase import LexiconDataBase
+from models.words import Words
+
 
 # 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
-
-# 获取当前文件的路径
-current_file_path = os.path.abspath(__file__)
-# 获取当前文件所在文件夹的位置
-current_folder_path = os.path.dirname(current_file_path)
-
-
-def get_lexiconDataBase():
-    lexiconDataBase = LexiconDataBase()
-    return lexiconDataBase
-
-
-# 获取中文食谱数据
 def extract_menu_data(doc_path):
     """
     从 Word 文档中提取食谱数据。
@@ -91,38 +74,35 @@ def load_translation_from_csv(csv_path):
     return translation
 
 
-def load_translation_from_db():
+async def _translate_text(text):
+    """"
+    将食谱中文转化为英语
+    :param text: 需要翻译的文本
+    :return: 翻译后的文本列表
     """
-    从数据库中加载中英文对照翻译数据。
-    :return: 包含中英文对照的字典
-    """
-    lexiconDataBase = get_lexiconDataBase()
-    rows = lexiconDataBase.get_lexicon_all()
-    translation = dict(rows)
-    lexiconDataBase.close()
-    return translation
-
-
-# 将中文食谱转换为中英文对照
-def translate_text(text, translation):
     items = text.split()
     translated_items = []
+    global translation
     for item in items:
-        trans = translation.get(item, "")
-        translated_item = f"<bold>{item}</bold> <br> {trans} <br>"
+        trans = await  Words.filter(word=item).first().values("word", "translation")
+        # 如果没有翻译结果，则跳过该词
+        if trans is None:
+            continue
+        translation = trans["translation"]
+        translated_item = f"<bold>{item}</bold> <br> {translation} <br>"
         translated_items.append(translated_item)
     return " ".join(translated_items)
 
 
-def translate_data(data, translation):
+# 获取翻译结果
+async def translate_data(data):
     """
     将食谱数据中的中文转换为中英文对照。
-    :param data: 包含食谱数据的字典
-    :param translation: 包含中英文对照的字典
-    :return: 转换后的食谱数据字典
+    :param data: 需要翻译的数据
+    :return: 翻译后的食谱数据
     """
     translated_data = {
-        key: [translate_text(item, translation) for item in value]
+        key: [await _translate_text(item) for item in value]
         for key, value in data.items()
     }
     return translated_data
@@ -145,7 +125,7 @@ def generate_html(translated_data):
 
     # 从文件中加载HTML模板
     with open(
-            current_folder_path + os.sep + "template.html", "r", encoding="utf-8"
+            sys.path[0] + os.sep + "template.html", "r", encoding="utf-8"
     ) as f:
         template_content = f.read()
     html_template = Template(template_content)
@@ -154,11 +134,11 @@ def generate_html(translated_data):
     return html
 
 
-def generate_docx(html):
+async def generate_docx(html):
     """
     将HTML内容转换为Word文档
     :param html: 包含HTML内容的字符串
-    :param output_path: 输出Word文档的路径
+    :return: Word文档对象
     """
     # 将HTML转换为Word文档
     doc = Document()
@@ -210,50 +190,4 @@ def generate_docx(html):
     for border_type in ["top", "left", "bottom", "right", "insideH", "insideV"]:
         set_border(tblBorders, border_type)
 
-    return doc
-
-
-def generate_translate_save_docx(doc_path, output_path):
-    """
-    :param doc_path: 输入 Word 文档的路径
-    :param output_path: 输出 Word 文档的路径
-    """
-    # 使用示例
-    data = extract_menu_data(current_folder_path + os.sep + doc_path)
-    # translation = load_translation_from_csv(
-    #     current_folder_path + os.sep + "translation.csv"
-    # )
-    translation = load_translation_from_db()
-    # 转换食谱数据
-    translated_data = translate_data(data, translation)
-
-    # 生成HTML
-    html = generate_html(translated_data)
-
-    # 生成Word文档
-    doc = generate_docx(html)
-
-    # 保存Word文档
-    doc.save(current_folder_path + os.sep + "data" + os.sep + output_path)
-
-
-def translate_document(doc_path):
-    """
-    翻译Word文档中的中文文本，并保存为新的Word文档。
-    :param doc_path: 输入 Word 文档的路径
-    :param output_path: 输出 Word 文档的路径
-    """
-    # 提取食谱数据
-    data = extract_menu_data(doc_path)
-    # 加载中英文对照表
-    translation = load_translation_from_csv(
-        current_folder_path + os.sep + "translation.csv"
-    )
-    # 转换食谱数据
-    translated_data = translate_data(data, translation)
-    # 生成HTML
-    html = generate_html(translated_data)
-    # 生成Word文档
-    doc = generate_docx(html)
-    # 保存Word文档
     return doc
